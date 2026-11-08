@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Python Testing & Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+fujitrack.db
+backend/fujitrack.db
+
+# Dynamic User Generated Data
+backend/data/cleaned/*
+!backend/data/cleaned/.gitkeep
+backend/data/reports/*
+!backend/data/reports/.gitkeep
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.npm
+.eslintcache
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log

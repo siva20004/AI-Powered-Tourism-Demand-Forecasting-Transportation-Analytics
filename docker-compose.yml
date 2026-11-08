@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: fujitrack_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: fujitrack_admin
+      POSTGRES_PASSWORD: fujitrack_secure_password_2026
+      POSTGRES_DB: fujitrack_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fujitrack_admin -d fujitrack_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fujitrack_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://fujitrack_admin:fujitrack_secure_password_2026@db:5432/fujitrack_db
+      JWT_SECRET_KEY: fujikyu-dx-enterprise-jwt-secret-key-mtfuji-2026
+      ENVIRONMENT: production
+      DEBUG: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/data:/app/backend/data
+
+volumes:
+  postgres_data:

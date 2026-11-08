@@ -1,0 +1,15 @@
+{
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://fujitrack-ai-platform.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
