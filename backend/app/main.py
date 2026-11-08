@@ -1,4 +1,8 @@
 import os
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from datetime import datetime, timezone
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +40,7 @@ app.add_middleware(
 
 # Health Check
 @app.get("/api/health", tags=["System Health"])
+@app.get("/api/v1/health", tags=["System Health"])
 def health_check(db: Session = Depends(get_db)):
     db_status = "connected"
     try:
@@ -82,4 +87,4 @@ else:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
