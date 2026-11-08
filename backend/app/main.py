@@ -69,13 +69,43 @@ app.include_router(routes_perf.router, prefix=settings.API_V1_PREFIX)
 app.include_router(insights.router, prefix=settings.API_V1_PREFIX)
 app.include_router(reports.router, prefix=settings.API_V1_PREFIX)
 
+@app.on_event("startup")
+def startup_event():
+    """Auto-seed initial database if tables are empty."""
+    try:
+        from app.core.database import SessionLocal
+        from app.models.entities import Route
+        db = SessionLocal()
+        route_count = db.query(Route).count()
+        db.close()
+        if route_count == 0:
+            print("Database empty. Auto-seeding initial Mt. Fuji dataset...")
+            from seeds.seed_fuji_data import seed_database
+            seed_database()
+            print("Auto-seed complete.")
+    except Exception as e:
+        print(f"Startup auto-seed notice: {e}")
+
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pathlib import Path
 
 # Static Files serving for Production build if frontend/dist exists
 dist_path = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 if dist_path.exists():
-    app.mount("/", StaticFiles(directory=str(dist_path), html=True), name="static")
+    assets_path = dist_path / "assets"
+    if assets_path.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_path)), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        # Allow API routes to pass through if not matched
+        if full_path.startswith("api/") or full_path == "api":
+            return JSONResponse(status_code=404, content={"detail": "Not Found"})
+        file_path = dist_path / full_path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(dist_path / "index.html"))
 else:
     @app.get("/")
     def root():
